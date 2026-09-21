@@ -1,0 +1,25 @@
+F5
+ │
+ ├─► Компилация → UserService.dll
+ │
+ ├─► Program.cs се изпълнява
+ │    ├─ CreateBuilder → чете appsettings.json
+ │    ├─ AddControllers, AddSwagger, AddDbContext
+ │    ├─ Build → app
+ │    ├─ EnsureCreated → users.db
+ │    ├─ UseSwagger, MapControllers
+ │    └─ app.Run() → слуша на 7276
+ │
+ ├─► Браузърът отваря /swagger
+ │    └─ Swagger UI се показва
+ │
+ ├─► Ти натискаш Execute на /api/Test
+ │    ├─ Заявка GET /api/Test
+ │    ├─ Middleware-ите минават
+ │    ├─ Routing намира TestController.Get()
+ │    ├─ Методът се изпълнява
+ │    ├─ Връща Ok(JSON)
+ │    └─ Swagger показва JSON-а
+ │
+ └─► Спираш с червения квадрат
+      └─ app.Run() приключва
