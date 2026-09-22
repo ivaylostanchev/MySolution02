@@ -1,0 +1,72 @@
+F5
+ │
+ ├─► Компилация → UserService.dll + OperativeService.dll
+ │
+ ├─► Program.cs се изпълнява (и в двата проекта)
+ │    ├─ CreateBuilder → чете appsettings.json
+ │    ├─ AddControllers, AddSwagger, AddDbContext
+ │    ├─ AddAuthentication (JWT)
+ │    ├─ Build → app
+ │    ├─ EnsureCreated → users.db / rolls.db
+ │    ├─ UseMiddleware (ItsExceptionMiddleware)
+ │    ├─ UseSwagger, UseSwaggerUI
+ │    ├─ UseAuthentication, UseAuthorization
+ │    ├─ MapControllers
+ │    └─ app.Run() → слуша на 7276 (User) и 7291 (Operative)
+ │
+ ├─► Браузърът отваря /swagger (два таба)
+ │    └─ Swagger UI се показва за всеки микросервиз
+ │
+ ├─► Тест 1: Регистрация
+ │    ├─ POST /api/ItsAuth/register (multipart/form-data)
+ │    ├─ Middleware-ите минават
+ │    ├─ Routing намира ItsAuthController.Register()
+ │    ├─ Validation: проверява DTO-то (Required, EmailAddress, MinLength)
+ │    ├─ Проверява дали Email съществува
+ │    ├─ Хешира паролата с BCrypt
+ │    ├─ Записва потребителя в users.db
+ │    └─ Връща 200 OK { "message": "User created successfully" }
+ │
+ ├─► Тест 2: Логин
+ │    ├─ POST /api/ItsAuth/login (application/json)
+ │    ├─ Routing намира ItsAuthController.Login()
+ │    ├─ Validation: проверява DTO-то
+ │    ├─ Търси потребителя по Email
+ │    ├─ Проверява паролата с BCrypt
+ │    ├─ Създава JWT токен (claims: sub, email, jti, exp)
+ │    └─ Връща 200 OK { "token": "eyJhbGciOi..." }
+ │
+ ├─► Тест 3: Хвърляне на зарове
+ │    ├─ POST /api/ItsRolls
+ │    ├─ Authorization: Bearer <token>
+ │    ├─ UseAuthentication проверява токена
+ │    ├─ UseAuthorization проверява [Authorize]
+ │    ├─ Routing намира ItsRollsController.Roll()
+ │    ├─ Чете UserId от claims (sub)
+ │    ├─ Хвърля два зара (Random 1-6)
+ │    ├─ Записва резултата в rolls.db
+ │    └─ Връща 200 OK { die1, die2, sum, rolledAt }
+ │
+ ├─► Тест 4: История с филтри
+ │    ├─ GET /api/ItsRolls?Filter=Year&Year=2026&SortBy=sum&Order=desc&Page=1&PageSize=10
+ │    ├─ UseAuthentication проверява токена
+ │    ├─ Routing намира ItsRollsController.GetRolls()
+ │    ├─ Validation: проверява query параметрите
+ │    ├─ Филтрира по UserId (от токена) + Year
+ │    ├─ Сортира: Sum primary, Date secondary (ако участва)
+ │    ├─ Пагинация: Skip + Take
+ │    └─ Връща 200 OK { data, page, pageSize, totalRecords, totalPages }
+ │
+ ├─► Тест 5: Невалидни данни
+ │    ├─ POST /api/ItsAuth/register с празни полета
+ │    ├─ Validation: ASP.NET хваща грешките
+ │    └─ Връща 400 Bad Request { errors: { ... } }
+ │
+ ├─► Тест 6: Неочаквана грешка
+ │    ├─ Изключение в контролера
+ │    ├─ ItsExceptionMiddleware хваща
+ │    ├─ Логва грешката
+ │    └─ Връща 500 Internal Server Error { status, message, detail }
+ │
+ └─► Спираш
+      └─ app.Run() приключва (и в двата проекта)

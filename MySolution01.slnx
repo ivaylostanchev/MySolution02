@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Diagram.txt" />
+    <File Path="ReadMe.md" />
+  </Folder>
   <Project Path="OperativeService/OperativeService.csproj" />
   <Project Path="UserService/UserService.csproj" />
 </Solution>
