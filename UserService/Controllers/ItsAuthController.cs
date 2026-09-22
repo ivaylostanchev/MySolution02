@@ -91,6 +91,12 @@ public class ItsAuthController : ControllerBase
 
         return Ok(new ItsAuthResponseDto { Token = token });
     }
+    //// GET /api/ItsAuth/test-error
+    //[HttpGet("test-error")]
+    //public IActionResult TestError()
+    //{
+    //    throw new Exception("This is a test error");
+    //}
 
     // Помощен метод за създаване на JWT
     private string GenerateJwtToken(ItsUser user)

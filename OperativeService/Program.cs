@@ -62,6 +62,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Build-ваме приложението
 var app = builder.Build();
 
+app.UseMiddleware<OperativeService.Middleware.ItsExceptionMiddleware>();
+
 // Създаваме scope и се уверяваме, че базата съществува
 using (var scope = app.Services.CreateScope())
 {

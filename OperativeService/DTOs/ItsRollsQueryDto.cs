@@ -1,37 +1,39 @@
 ﻿// Query параметрите за GET /api/ItsRolls.
-// Описват филтри, сортиране и пагинация.
+// Валидират се автоматично от ASP.NET.
+
+using System.ComponentModel.DataAnnotations;
 
 namespace OperativeService.DTOs;
 
 public class ItsRollsQueryDto
 {
-    // Филтър: all | year | month | day
+    [RegularExpression("^(all|year|month|day)$", ErrorMessage = "Filter must be: all, year, month, day")]
     public string Filter { get; set; } = "all";
 
-    // Година (за filter=year, month, day)
+    [Range(1900, 2100, ErrorMessage = "Year must be between 1900 and 2100")]
     public int? Year { get; set; }
 
-    // Месец (за filter=month, day)
+    [Range(1, 12, ErrorMessage = "Month must be between 1 and 12")]
     public int? Month { get; set; }
 
-    // Ден (за filter=day)
+    [Range(1, 31, ErrorMessage = "Day must be between 1 and 31")]
     public int? Day { get; set; }
 
-    // Първо сортиране: date | sum
+    [RegularExpression("^(id|date|sum)$", ErrorMessage = "SortBy must be: id, date, sum")]
     public string SortBy { get; set; } = "id";
 
-    // Посока на първото сортиране: asc | desc
+    [RegularExpression("^(asc|desc)$", ErrorMessage = "Order must be: asc, desc")]
     public string Order { get; set; } = "asc";
 
-    // Второ сортиране (по избор)
+    [RegularExpression("^(id|date|sum)$", ErrorMessage = "SortBy2 must be: id, date, sum")]
     public string? SortBy2 { get; set; }
 
-    // Посока на второто сортиране
+    [RegularExpression("^(asc|desc)$", ErrorMessage = "Order2 must be: asc, desc")]
     public string? Order2 { get; set; }
 
-    // Номер на страница (започва от 1)
+    [Range(1, int.MaxValue, ErrorMessage = "Page must be at least 1")]
     public int Page { get; set; } = 1;
 
-    // Брой записи на страница
+    [Range(1, 100, ErrorMessage = "PageSize must be between 1 and 100")]
     public int PageSize { get; set; } = 10;
 }

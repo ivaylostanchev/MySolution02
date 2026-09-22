@@ -176,4 +176,11 @@ public class ItsRollsController : ControllerBase
 
         return Ok(response);
     }
+    // GET /api/ItsRolls/test-error
+    //[HttpGet("test-error")]
+    //[AllowAnonymous]
+    //public IActionResult TestError()
+    //{
+    //    throw new Exception("This is a test error from OperativeService");
+    //}
 }
