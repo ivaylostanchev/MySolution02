@@ -10,6 +10,9 @@ using UserService.Data;
 // Създаваме builder за приложението
 var builder = WebApplication.CreateBuilder(args);
 
+// Фиксираме HTTPS порта
+builder.WebHost.UseUrls("https://localhost:7276");
+
 // Регистрираме контролерите
 builder.Services.AddControllers();
 

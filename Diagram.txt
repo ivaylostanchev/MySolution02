@@ -70,3 +70,35 @@ F5
  │
  └─► Спираш
       └─ app.Run() приключва (и в двата проекта)
+
+
+
+Models/
+Какво: Структура на данните в базата.
+Пример: ItsUser.cs, ItsDiceRoll.cs
+Кой ги използва: EF Core (за таблицата), контролерите (за запис/четене).
+
+DTOs/
+Какво: Формат на входа/изхода на API-то.
+Пример: ItsRegisterDto, ItsLoginDto, ItsRollsQueryDto
+Кой ги използва: ASP.NET (за валидация), контролерите (като параметри).
+
+Data/ItsAppDbContext.cs
+Какво: Връзка между C# и базата.
+Какво съдържа: DbSet<T> за всяка таблица.
+Кой го използва: EF Core (за SQL), контролерите (_db.Users).
+
+Controllers/
+Какво: Endpoints — отговарят на HTTP заявки.
+Пример: ItsAuthController, ItsRollsController
+Кой ги използва: ASP.NET (извиква методите при заявка).
+
+Middleware/
+Какво: Код, който минава всяка заявка.
+Пример: ItsExceptionMiddleware — хваща изключения.
+Кой го използва: ASP.NET (извиква го при всяка заявка).
+
+Program.cs
+Какво: Входна точка. Конфигурира всичко.
+Какво съдържа: AddControllers, AddDbContext, AddAuthentication, app.Run().
+Кой го използва: Компилаторът (при стартиране).
