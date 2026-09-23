@@ -1,47 +1,65 @@
 RUN INSTRUCTIONS
-=================
+================
 
 
-1. Инсталирай Git
+1. Инсталирай .NET 8 SDK
+------------------------
+Отвори Command Prompt и напиши:
+
+winget install Microsoft.DotNet.SDK.8
+
+Затвори и отвори отново Command Prompt.
+
+Провери:
+
+dotnet --list-sdks
+
+Трябва да видиш версия 8.0.x.
+
+Ако winget не се разпознава, инсталирай App Installer от Microsoft Store.
+
+
+2. Инсталирай Git
 -----------------
 winget install --id Git.Git -e --source winget
 
 Затвори и отвори отново Command Prompt.
 
 Провери:
+
 git --version
 
 
-2. Отиди в temp папката
+3. Отиди в temp папката
 -----------------------
 cd %TEMP%
 
 
-3. Клонирай repo-то
+4. Клонирай repo-то
 -------------------
 git clone https://github.com/ivaylostanchev/MySolution02.git
 
 
-4. Влез в папката
+5. Влез в папката
 -----------------
 cd MySolution02
 
 
-5. Публикувай UserService
+6. Публикувай UserService
 -------------------------
 cd UserService
 dotnet publish -c Release
 cd ..
 
 
-6. Публикувай OperativeService
+7. Публикувай OperativeService
 ------------------------------
 cd OperativeService
 dotnet publish -c Release
 cd ..
 
 
-7. Стартирай UserService
+8. Стартирай UserService
 ------------------------
 Отвори НОВ Command Prompt прозорец.
 
@@ -51,7 +69,7 @@ UserService.exe
 Остави прозореца отворен.
 
 
-8. Стартирай OperativeService
+9. Стартирай OperativeService
 -----------------------------
 Отвори ОЩЕ ЕДИН нов Command Prompt прозорец.
 
@@ -61,35 +79,50 @@ OperativeService.exe
 Остави прозореца отворен.
 
 
-9. Отвори Swagger
------------------
+10. Отвори Swagger
+------------------
 В браузъра:
 
 https://localhost:7276/swagger
 https://localhost:7291/swagger
 
 
-10. Отвори HTML демото
+11. Отвори HTML демото
 ----------------------
 В браузъра:
 
 https://localhost:7291/index.html
 
 
-11. Спри
+12. Спри
 --------
 Във всеки от двата Command Prompt прозореца:
 
 Ctrl + C
 
 
-12. Изтрий temp папката (по избор)
+13. Изтрий temp папката (по избор)
 ----------------------------------
 cd %TEMP%
 rmdir /s /q MySolution02
 
 
-Забележка
----------
-Ако браузърът покаже предупреждение за сертификат:
-- Натисни "Advanced" -> "Proceed to localhost (unsafe)"
+ЗАБЕЛЕЖКИ
+--------
+
+1. Ако браузърът покаже предупреждение за сертификат:
+   Натисни "Advanced" -> "Proceed to localhost (unsafe)"
+
+2. ВАЖНО: Стартирай .exe файловете от папката "publish", не от другаде.
+
+   Правилният път:
+   cd %TEMP%\MySolution02\OperativeService\bin\Release\net8.0\publish
+
+   Ако стартираш от друга папка, wwwroot няма да се намери
+   и index.html ще дава 404.
+
+3. Ако "git" не се разпознава след инсталация:
+   Затвори и отвори отново Command Prompt.
+
+4. Ако "dotnet" не се разпознава:
+   Затвори и отвори отново Command Prompt.
