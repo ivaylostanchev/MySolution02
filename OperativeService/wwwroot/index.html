@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Зарове</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #ddd;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            color: #4ec9b0;
+        }
+
+        input, button {
+            font-family: monospace;
+            font-size: 14px;
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background: #1177bb;
+            }
+
+        .hidden {
+            display: none;
+        }
+
+        #error {
+            color: #f48771;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 8px;
+        }
+
+        th {
+            background: #252526;
+        }
+
+        /* Зарове */
+        .dice-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .die {
+            width: 120px;
+            height: 120px;
+            background: #2d2d30;
+            border: 2px solid #4ec9b0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 22px;
+            line-height: 1.1;
+            color: #4ec9b0;
+            letter-spacing: 1px;
+            white-space: pre;
+            padding: 0;
+            margin: 0;
+            box-shadow: 0 0 10px rgba(78, 201, 176, 0.2);
+        }
+
+        /* JSON полета */
+        .json-box {
+            background: #252526;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .json-label {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎲 Зарове</h1>
+
+    <div id="loginSection">
+        <h2>Логин</h2>
+        <input id="email" placeholder="Email" value="ivan@test.com" />
+        <input id="password" type="password" placeholder="Password" value="123456" />
+        <button onclick="doLogin()">Влез</button>
+        <p id="error"></p>
+
+        <!-- JSON от логин - ВЪТРЕ в loginSection -->
+        <div id="loginJsonBox" class="hidden">
+            <div class="json-label">JSON от логин:</div>
+            <div class="json-box" id="loginJson"></div>
+        </div>
+    </div>
+
+    <div id="mainSection" class="hidden">
+        <p>Логнат като: <span id="userEmail"></span></p>
+        <button onclick="rollDice()">🎲 Хвърли зарове</button>
+        <button onclick="loadHistory()">📜 История</button>
+        <button onclick="doLogout()">Изход</button>
+
+        <div id="diceResult"></div>
+        <div id="history"></div>
+
+        <div id="rollJsonBox" class="hidden">
+            <div class="json-label">JSON от хвърляне:</div>
+            <div class="json-box" id="rollJson"></div>
+        </div>
+        <div id="historyJsonBox" class="hidden">
+            <div class="json-label">JSON от история:</div>
+            <div class="json-box" id="historyJson"></div>
+        </div>
+    </div>
+
+    <script>
+                const API_AUTH = 'https://localhost:7276';
+                const API_ROLLS = 'https://localhost:7291';
+
+                function asciiDie(v) {
+                    const patterns = {
+                        1: ['   ', ' o ', '   '],
+                        2: ['o  ', '   ', '  o'],
+                        3: ['o  ', ' o ', '  o'],
+                        4: ['o o', '   ', 'o o'],
+                        5: ['o o', ' o ', 'o o'],
+                        6: ['o o', 'o o', 'o o']
+                    };
+                    const p = patterns[v];
+                    return p[0] + '\n' + p[1] + '\n' + p[2];
+                }
+
+                function showJson(boxId, jsonId, data) {
+                    document.getElementById(boxId).classList.remove('hidden');
+                    document.getElementById(jsonId).textContent = JSON.stringify(data, null, 2);
+                }
+
+                async function doLogin() {
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    try {
+                        const res = await fetch(API_AUTH + '/api/ItsAuth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok) {
+                            document.getElementById('error').textContent = 'Грешка при логин';
+                            showJson('loginJsonBox', 'loginJson', data);
+                            return;
+                        }
+
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('email', email);
+                        showJson('loginJsonBox', 'loginJson', data);
+                        showMain();
+                    } catch (err) {
+                        document.getElementById('error').textContent = 'Грешка: ' + err.message;
+                    }
+                }
+
+                async function rollDice() {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(API_ROLLS + '/api/ItsRolls', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    const data = await res.json();
+                    showJson('rollJsonBox', 'rollJson', data);
+
+                    if (!res.ok) {
+                        document.getElementById('diceResult').innerHTML = '<p id="error">Грешка при хвърляне</p>';
+                        return;
+                    }
+
+                    const die1Ascii = asciiDie(data.die1);
+                    const die2Ascii = asciiDie(data.die2);
+                    document.getElementById('diceResult').innerHTML =
+                        '<h2>Резултат</h2>' +
+                        '<div class="dice-container">' +
+                            '<div class="die">' + die1Ascii + '</div>' +
+                            '<div class="die">' + die2Ascii + '</div>' +
+                        '</div>' +
+                        '<p>Сума: ' + data.sum + '</p>';
+                }
+
+                async function loadHistory() {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(API_ROLLS + '/api/ItsRolls?Page=1&PageSize=10', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    const data = await res.json();
+                    showJson('historyJsonBox', 'historyJson', data);
+
+                    if (!res.ok) {
+                        document.getElementById('history').innerHTML = '<p id="error">Грешка при зареждане</p>';
+                        return;
+                    }
+
+                    let html = '<h2>История (' + data.totalRecords + ' записа)</h2><table>';
+                    html += '<tr><th>Id</th><th>Зар 1</th><th>Зар 2</th><th>Сума</th><th>Дата</th></tr>';
+                    for (const r of data.data) {
+                        html += '<tr><td>' + r.id + '</td><td>' + r.die1 + '</td><td>' + r.die2 + '</td><td>' + r.sum + '</td><td>' + new Date(r.rolledAt).toLocaleString() + '</td></tr>';
+                    }
+                    html += '</table>';
+                    document.getElementById('history').innerHTML = html;
+                }
+
+                function doLogout() {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    location.reload();
+                }
+
+                function showMain() {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainSection').classList.remove('hidden');
+                    document.getElementById('userEmail').textContent = localStorage.getItem('email');
+                }
+
+                if (localStorage.getItem('token')) showMain();
+    </script>
+</body>
+</html>

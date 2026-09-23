@@ -16,6 +16,15 @@ builder.WebHost.UseUrls("https://localhost:7276");
 // Регистрираме контролерите
 builder.Services.AddControllers();
 
+// CORS — позволява заявки от други портове (HTML-ът вика API-то)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 // Регистрираме Swagger генератора
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -45,27 +54,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Build-ваме приложението
 var app = builder.Build();
 
-// Регистрираме global exception middleware
-app.UseMiddleware<UserService.Middleware.ItsExceptionMiddleware>();
-
-// Създаваме scope и се уверяваме, че базата съществува
+// Създаваме базата, ако не съществува
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ItsAppDbContext>();
     db.Database.EnsureCreated();
 }
 
-// Включваме Swagger middleware
+// Global exception middleware (най-отпред)
+app.UseMiddleware<UserService.Middleware.ItsExceptionMiddleware>();
+
+// CORS
+app.UseCors();
+
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Включваме authentication middleware (проверява токена)
+// Authentication + Authorization
 app.UseAuthentication();
-
-// Включваме authorization middleware (проверява права)
 app.UseAuthorization();
 
-// Насочваме заявките към контролерите
+// Routing
 app.MapControllers();
 
 // Стартираме сървъра

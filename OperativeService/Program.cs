@@ -16,10 +16,19 @@ builder.WebHost.UseUrls("https://localhost:7291");
 // Регистрираме контролерите
 builder.Services.AddControllers();
 
+// CORS — позволява заявки от други портове (HTML-ът вика API-то)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 // Регистрираме Swagger генератора
 builder.Services.AddEndpointsApiExplorer();
-// Регистрираме Swagger генератора с JWT поддръжка
-// Регистрираме Swagger генератора с JWT поддръжка
+
+// Регистрираме Swagger с JWT поддръжка
 builder.Services.AddSwaggerGen(options =>
 {
     // Дефинираме как изглежда JWT authentication
@@ -34,7 +43,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     // Казваме на Swagger да изисква токен за защитените endpoints
-    // Използваме OpenApiSecuritySchemeReference вместо остарелия OpenApiReference
     options.AddSecurityRequirement(document => new Microsoft.OpenApi.OpenApiSecurityRequirement
     {
         [new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
@@ -65,26 +73,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Build-ваме приложението
 var app = builder.Build();
 
-app.UseMiddleware<OperativeService.Middleware.ItsExceptionMiddleware>();
-
-// Създаваме scope и се уверяваме, че базата съществува
+// Създаваме базата, ако не съществува
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ItsAppDbContext>();
     db.Database.EnsureCreated();
 }
 
-// Включваме Swagger middleware
+// Global exception middleware (най-отпред)
+app.UseMiddleware<OperativeService.Middleware.ItsExceptionMiddleware>();
+
+// CORS (преди static files)
+app.UseCors();
+
+// Статични файлове от wwwroot
+app.UseStaticFiles();
+
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Включваме authentication middleware (проверява токена)
+// Authentication + Authorization
 app.UseAuthentication();
-
-// Включваме authorization middleware (проверява права)
 app.UseAuthorization();
 
-// Насочваме заявките към контролерите
+// Routing
 app.MapControllers();
 
 // Стартираме сървъра
