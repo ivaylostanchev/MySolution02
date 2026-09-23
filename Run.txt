@@ -1,0 +1,95 @@
+RUN INSTRUCTIONS
+=================
+
+
+1. Инсталирай Git
+-----------------
+winget install --id Git.Git -e --source winget
+
+Затвори и отвори отново Command Prompt.
+
+Провери:
+git --version
+
+
+2. Отиди в temp папката
+-----------------------
+cd %TEMP%
+
+
+3. Клонирай repo-то
+-------------------
+git clone https://github.com/ivaylostanchev/MySolution02.git
+
+
+4. Влез в папката
+-----------------
+cd MySolution02
+
+
+5. Публикувай UserService
+-------------------------
+cd UserService
+dotnet publish -c Release
+cd ..
+
+
+6. Публикувай OperativeService
+------------------------------
+cd OperativeService
+dotnet publish -c Release
+cd ..
+
+
+7. Стартирай UserService
+------------------------
+Отвори НОВ Command Prompt прозорец.
+
+cd %TEMP%\MySolution02\UserService\bin\Release\net8.0\publish
+UserService.exe
+
+Остави прозореца отворен.
+
+
+8. Стартирай OperativeService
+-----------------------------
+Отвори ОЩЕ ЕДИН нов Command Prompt прозорец.
+
+cd %TEMP%\MySolution02\OperativeService\bin\Release\net8.0\publish
+OperativeService.exe
+
+Остави прозореца отворен.
+
+
+9. Отвори Swagger
+-----------------
+В браузъра:
+
+https://localhost:7276/swagger
+https://localhost:7291/swagger
+
+
+10. Отвори HTML демото
+----------------------
+В браузъра:
+
+https://localhost:7291/index.html
+
+
+11. Спри
+--------
+Във всеки от двата Command Prompt прозореца:
+
+Ctrl + C
+
+
+12. Изтрий temp папката (по избор)
+----------------------------------
+cd %TEMP%
+rmdir /s /q MySolution02
+
+
+Забележка
+---------
+Ако браузърът покаже предупреждение за сертификат:
+- Натисни "Advanced" -> "Proceed to localhost (unsafe)"
